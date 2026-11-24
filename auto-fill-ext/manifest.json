@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "Auto Fill Mid-Meeting Form",
+  "version": "1.0",
+  "description": "Mengisi status Good + remark dan menyimpan semua section, lalu Submit.",
+  "permissions": ["activeTab", "scripting"],
+  "background": { "service_worker": "background.js" },
+  "action": { "default_title": "Isi otomatis form" }
+}
