@@ -5,7 +5,8 @@
   // ===== KONFIGURASI =====
   const STATUS = "Good";
   const REMARK = "ok untuk komponen ini sudah sesuai dan bagus";
-  const AUTO_SUBMIT = true;
+  const AUTO_SUMMARY_SAVE = false; // false = kamu klik Save di Summary sendiri
+  const AUTO_SUBMIT = false;       // false = kamu klik Submit sendiri
   const TABS = ["aspect2", "aspect3", "aspect4", "aspect5"]; // I - IV
   const SUMMARY_TAB = "aspect6";
   // =======================
@@ -31,7 +32,7 @@
   const NEGATIVE = /(cancel|batal|no|tidak|close|tutup|back|kembali)/i;
   const POPUP_SELECTOR = [
     ".modal.show", ".modal.in", "[role='dialog']", "[role='alertdialog']",
-    ".swal2-popup", ".swal-modal", ".ReactModal__Content", "[class*='modal' i][class*='content' i]"
+    ".sweet-alert", ".swal2-popup", ".swal-modal", ".ReactModal__Content", "[class*='modal' i][class*='content' i]"
   ].join(",");
   const isVisible = (el) => !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
 
@@ -60,6 +61,21 @@
     }
     return true;
   };
+
+
+  // Watcher: klik OK otomatis di sweet-alert kapan pun muncul (mis. server lambat)
+  const watcher = setInterval(() => {
+    document.querySelectorAll(".sweet-alert").forEach((p) => {
+      if (!isVisible(p)) return;
+      const ok = [...p.querySelectorAll("button")].find(
+        (b) => POSITIVE.test(b.textContent.trim()) && isVisible(b)
+      );
+      if (ok) {
+        console.log(`[watcher] "${p.querySelector("h2")?.textContent.trim()}" -> klik ${ok.textContent.trim()}`);
+        ok.click();
+      }
+    });
+  }, 400);
 
   const setTextarea = (el, value) => {
     const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value").set;
@@ -146,8 +162,10 @@
     await waitFor(() => sTab.classList.contains("active"));
     await sleep(1500);
 
-    const saveSummary = btnByText(document.querySelector("main"), "Save");
-    if (saveSummary) {
+    const saveSummary = AUTO_SUMMARY_SAVE ? btnByText(document.querySelector("main"), "Save") : null;
+    if (!AUTO_SUMMARY_SAVE) {
+      console.log("[Summary] dibuka. Silakan klik Save (dan Submit) sendiri.");
+    } else if (saveSummary) {
       saveSummary.click();
       await sleep(500);
       await handlePopup("summary-save");
@@ -172,6 +190,7 @@
   } catch (e) {
     console.error("Automation error:", e);
   } finally {
+    clearInterval(watcher);
     window.__autofillRunning = false;
   }
 })();

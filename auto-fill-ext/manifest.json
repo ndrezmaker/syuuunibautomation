@@ -3,7 +3,26 @@
   "name": "Auto Fill Mid-Meeting Form",
   "version": "1.0",
   "description": "Mengisi status Good + remark dan menyimpan semua section, lalu Submit.",
-  "permissions": ["activeTab", "scripting"],
-  "background": { "service_worker": "background.js" },
-  "action": { "default_title": "Isi otomatis form" }
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Isi otomatis form",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
 }
