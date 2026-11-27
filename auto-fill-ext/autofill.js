@@ -4,7 +4,25 @@
 
   // ===== KONFIGURASI =====
   const STATUS = "Good";
-  const REMARK = "ok untuk komponen ini sudah sesuai dan bagus";
+  // {name} diganti otomatis dengan nama komponen/section
+  // Dipilih acak untuk tiap section (tidak sama dengan section sebelumnya)
+  const REMARK_TEMPLATES = [
+    "ok untuk komponen {name} sudah sesuai dan bagus",
+    "komponen {name} sudah sesuai dan baik",
+    "untuk komponen {name} sudah tepat dan bagus",
+    "ok, komponen {name} sudah sesuai dan memadai",
+    "komponen {name} sudah sesuai standar dan bagus",
+    "secara keseluruhan komponen {name} sudah baik dan sesuai",
+    "komponen {name} sudah layak dan sesuai, bagus",
+    "ok untuk komponen {name}, sudah sesuai dan berjalan dengan baik",
+    "komponen {name} sudah sesuai dan tidak ada kendala, bagus",
+    "untuk komponen {name} sudah baik, tepat, dan sesuai",
+  ];
+  // Ganti nama yang janggal di website dengan nama yang lebih rapi (opsional)
+  const NAME_OVERRIDES = {
+    "Individual,Assigment,Project,Quiz,Presentation": "Individual, Assignment, Project, Quiz, dan Presentation",
+    "Overall Evaluation, Feedback, Other thing etc": "Overall Evaluation, Feedback, dan lainnya",
+  };
   const AUTO_SUMMARY_SAVE = false; // false = kamu klik Save di Summary sendiri
   const AUTO_SUBMIT = false;       // false = kamu klik Submit sendiri
   const TABS = ["aspect2", "aspect3", "aspect4", "aspect5"]; // I - IV
@@ -77,6 +95,28 @@
     });
   }, 400);
 
+
+  // Ambil nama komponen dari judul section yang membungkus card
+  const getComponentName = (card) => {
+    let region = card.closest(".C--CollapseRegion");
+    while (region) {
+      const title = region
+        .querySelector(":scope > .C--CollapseRegion--header .font-weight-bold")
+        ?.textContent.replace(/\s+/g, " ").trim();
+      if (title && !/^Specific Aspect:/i.test(title)) return NAME_OVERRIDES[title] || title;
+      region = region.parentElement?.closest(".C--CollapseRegion");
+    }
+    return "ini"; // fallback: "komponen ini"
+  };
+  let lastTemplate = -1;
+  const buildRemark = (card) => {
+    let idx;
+    do { idx = Math.floor(Math.random() * REMARK_TEMPLATES.length); }
+    while (idx === lastTemplate && REMARK_TEMPLATES.length > 1);
+    lastTemplate = idx;
+    return REMARK_TEMPLATES[idx].replace("{name}", getComponentName(card));
+  };
+
   const setTextarea = (el, value) => {
     const setter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value").set;
     setter.call(el, value);
@@ -129,7 +169,11 @@
 
       const ok = await selectOption(card, STATUS);
       const ta = card.querySelector("textarea");
-      if (ta && !ta.disabled) setTextarea(ta, REMARK);
+      if (ta && !ta.disabled) {
+        const remark = buildRemark(card);
+        setTextarea(ta, remark);
+        console.log(`  section ${i + 1}: remark = "${remark}"`);
+      }
       await sleep(300);
 
       const save = btnByText(card, "Save");
